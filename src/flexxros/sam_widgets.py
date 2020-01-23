@@ -128,17 +128,115 @@ class SamPlots(flx.Widget):
                 flx.Widget(flex=1)
                 flx.Widget(minsize=220)
 
+class SamInfoDash(ROSWidget):
+
+    def init(self):
+
+        with flx.HBox(flex=1, style="background: #e6e6df;"):
+            with flx.FormLayout(flex=1):
+                flx.Widget(minsize=20)
+                self.heading = flx.LineEdit(title="Heading", text="")
+                self.pitch = flx.LineEdit(title="Pitch", text="")
+                self.roll = flx.LineEdit(title="Roll", text="")
+                flx.Widget(minsize=40)
+            with flx.FormLayout(flex=1):
+                flx.Widget(minsize=20)
+                self.depth = flx.LineEdit(title="Depth", text="")
+                self.xpos = flx.LineEdit(title="X", text="")
+                self.ypos = flx.LineEdit(title="Y", text="")
+                flx.Widget(minsize=40)
+            with flx.FormLayout(flex=1):
+                flx.Widget(minsize=20)
+                self.xvel = flx.LineEdit(title="X vel", text="")
+                self.yvel = flx.LineEdit(title="Y vel", text="")
+                self.zvel = flx.LineEdit(title="Z vel", text="")
+                flx.Widget(minsize=40)
+            with flx.FormLayout(flex=1):
+                flx.Widget(minsize=20)
+                self.gps_status = flx.LineEdit(title="GPS Status", text="")
+                self.dvl_status = flx.LineEdit(title="DVL Status", text="")
+                self.battery_status = flx.LineEdit(title="Battery level", text="")
+                flx.Widget(minsize=40)
+            with flx.FormLayout(flex=1):
+                flx.Widget(minsize=20)
+                self.vbs_fb = flx.LineEdit(title="VBS fb", text="")
+                self.lcg_fb = flx.LineEdit(title="LCG fb", text="")
+                self.rpm_fb = flx.LineEdit(title="RPM fb", text="")
+                flx.Widget(minsize=40)
+            
+        # We subscribe to these topics at full frquency (no extra arg)
+        self.subscribe("/sam/core/gps", "sensor_msgs/NavSatFix", self.gps_callback)
+        self.subscribe("/sam/core/battery_fb", "sensor_msgs/BatteryState", self.battery_callback)
+        # We only subscribe to these topics at 1hz
+        self.subscribe("/sam/dr/odom", "nav_msgs/Odometry", self.odom_callback, 1.)
+        self.subscribe("/sam/core/vbs_fb", "sam_msgs/PercentStamped", self.vbs_callback, 1.)
+        self.subscribe("/sam/core/lcg_fb", "sam_msgs/PercentStamped", self.lcg_callback, 1.)
+        self.subscribe("/sam/ctrl/depth_feedback", "std_msgs/Float64", self.depth_callback, 1.)
+        self.subscribe("/sam/ctrl/pitch_feedback", "std_msgs/Float64", self.pitch_callback, 1.)
+        self.subscribe("/sam/ctrl/roll_feedback", "std_msgs/Float64", self.roll_callback, 1.)
+        self.subscribe("/sam/ctrl/yaw_feedback", "std_msgs/Float64", self.yaw_callback, 1.)
+
+    def odom_callback(self, msg):
+
+        self.xpos.set_text("%.02fm" % msg.pose.pose.position.x)
+        self.ypos.set_text("%.02fm" % msg.pose.pose.position.y)
+        self.xvel.set_text("%.02fm/s" % msg.twist.twist.linear.x)
+        self.yvel.set_text("%.02fm/s" % msg.twist.twist.linear.y)
+        self.zvel.set_text("%.02fm/s" % msg.twist.twist.linear.z)
+
+    def vbs_callback(self, msg):
+
+        self.vbs_fb.set_text("%.02f%" % msg.value)
+
+    def lcg_callback(self, msg):
+
+        self.lcg_fb.set_text("%.02f%" % msg.value)
+
+    def depth_callback(self, msg):
+
+        self.depth.set_text("%.02fm" % msg.data)
+
+    def pitch_callback(self, msg):
+
+        self.pitch.set_text("%.02f" % (180./3.14*msg.data))
+
+    def roll_callback(self, msg):
+
+        self.roll.set_text("%.02f" % (180./3.14*msg.data))
+
+    def yaw_callback(self, msg):
+
+        self.heading.set_text("%.02f" % (90. - 180./3.14*msg.data))
+
+    def battery_callback(self, msg):
+        
+        # battery health not good
+        if msg.power_supply_health != 1 or msg.percentage < 20.:
+            self.battery_status.apply_style("background: #ffb3af;")
+        else:
+            self.battery_status.apply_style("background: #bbffbb;")
+        self.battery_status.set_text("%.02f%" % msg.percentage)
+
+    def gps_callback(self, msg):
+        
+        # no fix
+        if msg.status.status == -1:
+            self.gps_status.apply_style("background: #ffb3af;")
+        else:
+            self.gps_status.apply_style("background: #bbffbb;")
+            self.gps_status.set_text("Lat: %.04f, Lon: %.04f" % (msg.latitude, msg.longitude))
+
 class SamActuatorBar(ROSWidget):
 
     def init(self):
 
-        with flx.VBox(flex=0, minsize=300, style="background: #9d9;"):
+        with flx.VBox(flex=0, minsize=400, style="background: #9d9;"):
             self.thruster_angles = GenericActuatorBox("Thruster Angles", "/sam/core/thrust_vector_cmd", "sam_msgs/ThrusterAngles",
                                                       [{"name": "Hori.", "member": "thruster_horizontal_radians", "min": -0.1, "max": 0.18},
                                                        {"name": "Vert.", "member": "thruster_vertical_radians", "min": -0.1, "max": 0.15}])
             self.thruster_rpms = GenericActuatorBox("Thruster RPMs", "/sam/core/rpm_cmd", "sam_msgs/ThrusterRPMs",
-                                                    [{"name": "Front", "member": "thruster_1_rpm", "min": -100, "max": 100, "type": "int"},
-                                                     {"name": "Back", "member": "thruster_2_rpm", "min": -100, "max": 100, "type": "int"}])
+                                                    [{"name": "Front", "member": "thruster_1_rpm", "min": -1000, "max": 1000, "type": "int"},
+                                                     {"name": "Back", "member": "thruster_2_rpm", "min": -1000, "max": 1000, "type": "int"}])
             self.leak_button = flx.Button(text="No leaks...", style="background: #008000;", disabled=True)
             lcg_actuator = ActuatorBox("Pitch - LCG", "sam_msgs/PercentStamped",
                                        "/sam/core/lcg_cmd", "/sam/core/lcg_fb",
@@ -150,14 +248,18 @@ class SamActuatorBar(ROSWidget):
                                        "/sam/core/tcg_cmd", "",
                                        "/sam/ctrl/tcg/pid_enable", "/sam/ctrl/tcg/setpoint", -1.6, 1.6, True)
 
-            flx.Widget(flex=1)
 
-            self.startup_check = ROSActionClientWidget("/sam/startup_check", "sam_msgs/SystemsCheck")
+            #flx.Widget(flex=1)
+            with flx.TabLayout(flex=1):
+                self.startup_check = ROSActionClientWidget("/sam/startup_check", "sam_msgs/SystemsCheck", title="Startup check", flex=1)
+                self.gps_fix_action = ROSActionClientWidget("/sam/gps_fix_server", "sam_msgs/GetGPSFix", title="Get GPS fix", flex=1)
+
             self.abort_button = flx.Button(text="Abort", style="background: #ff6961;")
 
-            self.subscribe("/sam/core/leak_fb", "sam_msgs/Leak", self.callback)
+            self.subscribe("/sam/core/leak_fb", "sam_msgs/Leak", self.leak_callback)
+            self.announce_publish("/abort", "std_msgs/Empty")
 
-    def callback(msg):
+    def leak_callback(msg):
 
         if msg.value:
             self.leak_button.set_text("Leaking!")
@@ -165,4 +267,5 @@ class SamActuatorBar(ROSWidget):
 
     @flx.reaction('abort_button.pointer_click')
     def _publish_abort(self, *events):
+        print("Abort button was clicked!")
         self.publish("/abort", {})

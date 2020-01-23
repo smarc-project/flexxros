@@ -44,8 +44,8 @@ class ROSMonNodeWidget(ROSWidget):
         self.name.set_text(nstate.name)
         current_state = self.node_states[nstate.state]
         self.state.set_text(current_state)
-        self.user_load.set_text(str(nstate.system_load))
-        self.memory.set_text(str(nstate.memory))
+        self.user_load.set_text("%.02f%" % (100.*nstate.user_load))
+        self.memory.set_text("%.02f MB" % (1e-6*float(nstate.memory)))
         self.restarts.set_text(str(nstate.restart_count))
         if current_state == "RUNNING":
             self.start_stop.set_text("Stop")
@@ -177,6 +177,7 @@ class ROSMonNode(ROSNode):
     def maybe_subscribe(self, events):
 
         topics = rospy.get_published_topics()
+        topics.sort()
 
         for topic in topics:
             if topic[1] != "rosmon_msgs/State" or topic[0] in self.feedback_topics:
