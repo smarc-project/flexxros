@@ -110,21 +110,21 @@ class SamPlots(flx.Widget):
 
         with flx.HBox(flex=1):
             with flx.VBox(flex=1):
-                self.plot1 = ROSTopicPlotter("/pitch_feedback", "std_msgs/Float64", "data", (-1.6, 1.6))
+                self.plot1 = ROSTopicPlotter("pitch_feedback", "std_msgs/Float64", "data", (-1.6, 1.6))
                 flx.Widget(flex=1)
-                self.plot2 = ROSTopicPlotter("/depth_feedback", "std_msgs/Float64", "data", (0, 6))
+                self.plot2 = ROSTopicPlotter("depth_feedback", "std_msgs/Float64", "data", (0, 6))
                 flx.Widget(flex=1)
-                self.plot3 = ROSTopicPlotter("/roll_feedback", "std_msgs/Float64", "data", (-1.6, 1.6))
+                self.plot3 = ROSTopicPlotter("roll_feedback", "std_msgs/Float64", "data", (-1.6, 1.6))
             with flx.VBox(flex=1):
-                self.plot4 = ROSTopicPlotter("/sam/core/lcg_cmd", "sam_msgs/PercentStamped", "value")
+                self.plot4 = ROSTopicPlotter("core/lcg_cmd", "sam_msgs/PercentStamped", "value")
                 flx.Widget(flex=1)
-                self.plot5 = ROSTopicPlotter("/sam/core/vbs_cmd", "sam_msgs/PercentStamped", "value")
+                self.plot5 = ROSTopicPlotter("core/vbs_cmd", "sam_msgs/PercentStamped", "value")
                 flx.Widget(flex=1)
-                self.plot6 = ROSTopicPlotter("/sam/core/tcg_cmd", "sam_msgs/BallastAngles", "weight_1_offset_radians", (-3.14, 3.14))
+                self.plot6 = ROSTopicPlotter("core/tcg_cmd", "sam_msgs/BallastAngles", "weight_1_offset_radians", (-3.14, 3.14))
             with flx.VBox(flex=1):
-                self.plot7 = ROSTopicPlotter("/sam/core/lcg_fb", "sam_msgs/PercentStamped", "value")
+                self.plot7 = ROSTopicPlotter("core/lcg_fb", "sam_msgs/PercentStamped", "value")
                 flx.Widget(flex=1)
-                self.plot8 = ROSTopicPlotter("/sam/core/vbs_fb", "sam_msgs/PercentStamped", "value")
+                self.plot8 = ROSTopicPlotter("core/vbs_fb", "sam_msgs/PercentStamped", "value")
                 flx.Widget(flex=1)
                 flx.Widget(minsize=220)
 
@@ -165,16 +165,16 @@ class SamInfoDash(ROSWidget):
                 flx.Widget(minsize=40)
             
         # We subscribe to these topics at full frquency (no extra arg)
-        self.subscribe("/sam/core/gps", "sensor_msgs/NavSatFix", self.gps_callback)
-        self.subscribe("/sam/core/battery_fb", "sensor_msgs/BatteryState", self.battery_callback)
+        self.subscribe("core/gps", "sensor_msgs/NavSatFix", self.gps_callback)
+        self.subscribe("core/battery_fb", "sensor_msgs/BatteryState", self.battery_callback)
         # We only subscribe to these topics at 1hz
-        self.subscribe("/sam/dr/odom", "nav_msgs/Odometry", self.odom_callback, 1.)
-        self.subscribe("/sam/core/vbs_fb", "sam_msgs/PercentStamped", self.vbs_callback, 1.)
-        self.subscribe("/sam/core/lcg_fb", "sam_msgs/PercentStamped", self.lcg_callback, 1.)
-        self.subscribe("/sam/ctrl/depth_feedback", "std_msgs/Float64", self.depth_callback, 1.)
-        self.subscribe("/sam/ctrl/pitch_feedback", "std_msgs/Float64", self.pitch_callback, 1.)
-        self.subscribe("/sam/ctrl/roll_feedback", "std_msgs/Float64", self.roll_callback, 1.)
-        self.subscribe("/sam/ctrl/yaw_feedback", "std_msgs/Float64", self.yaw_callback, 1.)
+        self.subscribe("dr/odom", "nav_msgs/Odometry", self.odom_callback, 1.)
+        self.subscribe("core/vbs_fb", "sam_msgs/PercentStamped", self.vbs_callback, 1.)
+        self.subscribe("core/lcg_fb", "sam_msgs/PercentStamped", self.lcg_callback, 1.)
+        self.subscribe("ctrl/depth_feedback", "std_msgs/Float64", self.depth_callback, 1.)
+        self.subscribe("ctrl/pitch_feedback", "std_msgs/Float64", self.pitch_callback, 1.)
+        self.subscribe("ctrl/roll_feedback", "std_msgs/Float64", self.roll_callback, 1.)
+        self.subscribe("ctrl/yaw_feedback", "std_msgs/Float64", self.yaw_callback, 1.)
 
     def odom_callback(self, msg):
 
@@ -231,33 +231,33 @@ class SamActuatorBar(ROSWidget):
     def init(self):
 
         with flx.VBox(flex=0, minsize=400, style="background: #9d9;"):
-            self.thruster_angles = GenericActuatorBox("Thruster Angles", "/sam/core/thrust_vector_cmd", "sam_msgs/ThrusterAngles",
+            self.thruster_angles = GenericActuatorBox("Thruster Angles", "core/thrust_vector_cmd", "sam_msgs/ThrusterAngles",
                                                       [{"name": "Hori.", "member": "thruster_horizontal_radians", "min": -0.1, "max": 0.18},
                                                        {"name": "Vert.", "member": "thruster_vertical_radians", "min": -0.1, "max": 0.15}])
-            self.thruster_rpms = GenericActuatorBox("Thruster RPMs", "/sam/core/rpm_cmd", "sam_msgs/ThrusterRPMs",
+            self.thruster_rpms = GenericActuatorBox("Thruster RPMs", "core/rpm_cmd", "sam_msgs/ThrusterRPMs",
                                                     [{"name": "Front", "member": "thruster_1_rpm", "min": -1000, "max": 1000, "type": "int"},
                                                      {"name": "Back", "member": "thruster_2_rpm", "min": -1000, "max": 1000, "type": "int"}])
             self.leak_button = flx.Button(text="No leaks...", style="background: #008000;", disabled=True)
             lcg_actuator = ActuatorBox("Pitch - LCG", "sam_msgs/PercentStamped",
-                                       "/sam/core/lcg_cmd", "/sam/core/lcg_fb",
-                                       "/sam/ctrl/lcg/pid_enable", "/sam/ctrl/lcg/setpoint", -1.6, 1.6)
+                                       "core/lcg_cmd", "core/lcg_fb",
+                                       "ctrl/lcg/pid_enable", "ctrl/lcg/setpoint", -1.6, 1.6)
             vbs_actuator = ActuatorBox("Depth - VBS", "sam_msgs/PercentStamped",
-                                       "/sam/core/vbs_cmd", "/sam/core/vbs_fb",
-                                       "/sam/ctrl/vbs/pid_enable", "/sam/ctrl/vbs/setpoint", 0, 5)
+                                       "core/vbs_cmd", "core/vbs_fb",
+                                       "ctrl/vbs/pid_enable", "ctrl/vbs/setpoint", 0, 5)
             tcg_actuator = ActuatorBox("Roll - TCG", "sam_msgs/BallastAngles",
-                                       "/sam/core/tcg_cmd", "",
-                                       "/sam/ctrl/tcg/pid_enable", "/sam/ctrl/tcg/setpoint", -1.6, 1.6, True)
+                                       "core/tcg_cmd", "",
+                                       "ctrl/tcg/pid_enable", "ctrl/tcg/setpoint", -1.6, 1.6, True)
 
 
             #flx.Widget(flex=1)
             with flx.TabLayout(flex=1):
-                self.startup_check = ROSActionClientWidget("/sam/startup_check", "sam_msgs/SystemsCheck", title="Startup check", flex=1)
-                self.gps_fix_action = ROSActionClientWidget("/sam/gps_fix_server", "sam_msgs/GetGPSFix", title="Get GPS fix", flex=1)
+                self.startup_check = ROSActionClientWidget("startup_check", "sam_msgs/SystemsCheck", title="Startup check", flex=1)
+                self.gps_fix_action = ROSActionClientWidget("gps_fix_server", "sam_msgs/GetGPSFix", title="Get GPS fix", flex=1)
 
             self.abort_button = flx.Button(text="Abort", style="background: #ff6961;")
 
-            self.subscribe("/sam/core/leak_fb", "sam_msgs/Leak", self.leak_callback)
-            self.announce_publish("/abort", "std_msgs/Empty")
+            self.subscribe("core/leak_fb", "sam_msgs/Leak", self.leak_callback)
+            self.announce_publish("abort", "std_msgs/Empty")
 
     def leak_callback(msg):
 
@@ -268,4 +268,4 @@ class SamActuatorBar(ROSWidget):
     @flx.reaction('abort_button.pointer_click')
     def _publish_abort(self, *events):
         print("Abort button was clicked!")
-        self.publish("/abort", {})
+        self.publish("abort", {})

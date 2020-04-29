@@ -19,7 +19,7 @@ class RobotModelWidget(flx.Widget):
                              The IP of the host computer.
                              """)
 
-    base_link = flx.StringProp("/base_link", settable=True, doc="""
+    base_link = flx.StringProp("base_link", settable=True, doc="""
                                The base link frame of the robot.
                                """)
 
@@ -31,7 +31,7 @@ class RobotModelWidget(flx.Widget):
                                  The port of web server serving .dae files for urdf.
                                  """)
 
-    robot_description = flx.StringProp("/sam/simple_description", settable=True, doc="""
+    robot_description = flx.StringProp("simple_description", settable=True, doc="""
                                        The ros param with the robot description.
                                        """)
 

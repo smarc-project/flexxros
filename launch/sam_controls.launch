@@ -1,0 +1,10 @@
+<launch>
+
+  <arg name="display_ip" default="127.0.0.1"/>
+  <arg name="robot_name" default="sam"/>
+
+  <node pkg="flexxros" type="sam_controls.py" name="web_interface" output="screen" ns="$(arg robot_name)">
+    <param name="display_ip" value="$(arg display_ip)"/>
+  </node>
+
+</launch>
