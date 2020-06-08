@@ -168,13 +168,13 @@ class SamInfoDash(ROSWidget):
         self.subscribe("core/gps", "sensor_msgs/NavSatFix", self.gps_callback)
         self.subscribe("core/battery_fb", "sensor_msgs/BatteryState", self.battery_callback)
         # We only subscribe to these topics at 1hz
-        self.subscribe("dr/odom", "nav_msgs/Odometry", self.odom_callback, 1.)
+        self.subscribe("dr/local/odom/filtered", "nav_msgs/Odometry", self.odom_callback, 1.)
         self.subscribe("core/vbs_fb", "sam_msgs/PercentStamped", self.vbs_callback, 1.)
         self.subscribe("core/lcg_fb", "sam_msgs/PercentStamped", self.lcg_callback, 1.)
-        self.subscribe("ctrl/depth_feedback", "std_msgs/Float64", self.depth_callback, 1.)
-        self.subscribe("ctrl/pitch_feedback", "std_msgs/Float64", self.pitch_callback, 1.)
-        self.subscribe("ctrl/roll_feedback", "std_msgs/Float64", self.roll_callback, 1.)
-        self.subscribe("ctrl/yaw_feedback", "std_msgs/Float64", self.yaw_callback, 1.)
+        self.subscribe("ctrl/odom_listener/odom_listener/depth_feedback", "std_msgs/Float64", self.depth_callback, 1.)
+        self.subscribe("ctrl/odom_listener/odom_listener/pitch_feedback", "std_msgs/Float64", self.pitch_callback, 1.)
+        self.subscribe("ctrl/odom_listener/odom_listener/roll_feedback", "std_msgs/Float64", self.roll_callback, 1.)
+        self.subscribe("ctrl/odom_listener/odom_listener/yaw_feedback", "std_msgs/Float64", self.yaw_callback, 1.)
 
     def odom_callback(self, msg):
 
