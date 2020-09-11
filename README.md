@@ -1,4 +1,6 @@
 # flexxros
+![CI](https://github.com/smarc-project/flexxros/workflows/CI/badge.svg?branch=noetic-devel) [![license](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
+
 ROS webpage GUIs through [flexx](https://flexx.readthedocs.io/en/stable/).
 Full documentation at https://nilsbore.github.io/flexxros-docs/ .
 
